@@ -1,0 +1,17 @@
+-- INSTRUCTIONS FOR USING THE DRAWING WINDOW -- 
+
+1) Use the mouse to Draw as you would normally in applications like Paint. Note that only one color is currently
+available for drawing the track, as adding more would result in a confusionn between the AI and the track.
+
+2) The track has an autocomplete feature, you can leave a bit of gap between the start and ends of your track.
+Bear in mind that this only works if the last line you draw is the one that is closest to the beginning of the track.
+Messing with the order of building can greatly harm the end product.
+
+3) For the above mentioned reason, a Start Over button has been added. This allows you to instantly start the building
+process over from scratch.
+
+4) The "Save Track" Button exports the track you have made as a PNG. This is important because the AI reads tracks as a PNG.
+
+5) All tracks must have a designated starting line. Save track will not work until one has been made.
+
+6) Try not to have any overlapping pieces of track, the track will save as an image, and has no concept of height or depth.
