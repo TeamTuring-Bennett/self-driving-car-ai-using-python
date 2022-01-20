@@ -15,3 +15,5 @@ process over from scratch.
 5) All tracks must have a designated starting line. Save track will not work until one has been made.
 
 6) Try not to have any overlapping pieces of track, the track will save as an image, and has no concept of height or depth.
+
+7) Have fun creating the tracks!
