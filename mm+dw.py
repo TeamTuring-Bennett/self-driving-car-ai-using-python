@@ -9,7 +9,7 @@ from PIL import ImageTk
 root = Tk()
 root.title("Main Menu")
 root.geometry("1280x720")
-bg = PhotoImage(file=r"C:\Users\Amee Madhani\Desktop\dl.beatsnoop.com-1642962022.png")
+bg = PhotoImage(file=r"image.png")
 
 
 my_label = Label(root, image=bg)
