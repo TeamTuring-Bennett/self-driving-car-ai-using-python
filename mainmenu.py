@@ -1,9 +1,4 @@
 from tkinter import *
-from logging import root
-from tkinter import messagebox
-import PIL as pog
-from PIL import Image
-from PIL import ImageTk
 from drawing_window import *
 
 
@@ -16,7 +11,7 @@ class MainMenu:
         bg = PhotoImage(file=r"image.png")
 
 
-        my_label = Label(root, image=bg)
+        my_label = Label(self.root, image=bg)
         my_label.place(x=0, y=0, relwidth=1, relheight=1)
         self.Font1 = ("Comic Sans MS", 20, "bold")
         self.Font2 = ("Avenir Next LT Pro", 20, "bold")

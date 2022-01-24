@@ -37,7 +37,8 @@ class Paint(object):
         self.sos_button.grid(row=3, column=14)
 
         self.menu_button = Button(self.root, text='Back to Menu', command=self.menu)
-
+        self.menu_button.grid(row=3, column=0)
+        
         self.c = Canvas(self.root, bg='#5fcca6', width=1280, height=720)
         self.c.grid(row=2, columnspan=15)
 
