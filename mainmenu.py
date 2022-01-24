@@ -13,11 +13,11 @@ class MainMenu:
         self.root = Tk()
         self.root.title("Main Menu")
         self.root.geometry("1280x720")
-        #bg = PhotoImage(file=r"C:\Users\Amee Madhani\Desktop\dl.beatsnoop.com-1642962022.png")
+        bg = PhotoImage(file=r"image.png")
 
 
-        #my_label = Label(root, image=bg)
-        #my_label.place(x=0, y=0, relwidth=1, relheight=1)
+        my_label = Label(root, image=bg)
+        my_label.place(x=0, y=0, relwidth=1, relheight=1)
         self.Font1 = ("Comic Sans MS", 20, "bold")
         self.Font2 = ("Avenir Next LT Pro", 20, "bold")
         self.Font2i = ("Avenir Next LT Pro", 17, "bold")
