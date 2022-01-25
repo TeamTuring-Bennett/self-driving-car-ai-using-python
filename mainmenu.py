@@ -1,5 +1,7 @@
 from tkinter import *
-from drawing_window import *
+from tkinter import simpledialog
+import drawing_window
+import cargame
 
 
 class MainMenu:
@@ -9,7 +11,6 @@ class MainMenu:
         self.root.title("Main Menu")
         self.root.geometry("1280x720")
         bg = PhotoImage(file=r"image.png")
-
 
         my_label = Label(self.root, image=bg)
         my_label.place(x=0, y=0, relwidth=1, relheight=1)
@@ -40,14 +41,22 @@ class MainMenu:
     
 
     def Manual(self):
-            Paint()
+            self.picktrack()
+            self.root.destroy()
+            cargame.Race(self.trackname, "Manual")
 
     def AI(self):
-            Paint()
-
+            self.picktrack()
+            self.root.destroy()
+            cargame.Race(self.trackname, "AI")
+            
     def PaintMode(self):
             self.root.destroy()
-            Paint()
+            drawing_window.Paint()
+        
+    def picktrack(self):
+            self.trackname = simpledialog.askstring("Track Select", "Please enter a track name for the car to drive on \n(without any extensions)") + '.png'
+            
 
 if __name__ == '__main__':
     MainMenu()

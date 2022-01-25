@@ -12,7 +12,9 @@ process over from scratch.
 
 4) The "Save Track" Button exports the track you have made as a PNG. This is important because the AI reads tracks as a PNG.
 
-5) All tracks must have a designated starting line. Save track will not work until one has been made.
+5) All tracks must have a designated starting line. Save track will not work until one has been made. NOTE: Please try to
+make the starting line as close to the top left of the track as possible in order to avoid long loading times. Also make the starting
+line along a sizeably straight path of the track, as it might mess with where the car spawns otherwise
 
 6) Try not to have any overlapping pieces of track, the track will save as an image, and has no concept of height or depth.
 

@@ -71,8 +71,9 @@ class Paint(object):
         self.activate_button(self.save_button)
         if self.start_made:
             self.c.create_line(self.points[-1], self.points[0], width=self.line_width, fill='#2e2d2d', capstyle=ROUND, smooth=TRUE, splinesteps=36)
-            self.c.create_line(self.points[-1], self.points[0], dash=1, width=2, fill='#e4e4e4')
-            self.c.create_line(self.points, dash=1, width=2, fill='#e4e4e4')
+            #implement these two after fixing autocomplete bugs.
+            #self.c.create_line(self.points[-1], self.points[0], dash=1, width=2, fill='#e4e4e4')
+            #self.c.create_line(self.points, dash=1, width=2, fill='#e4e4e4')
 
             savename = simpledialog.askstring('Save track as PNG', 'Please pick a name for the track.')
             if savename == None or savename == '':
