@@ -7,6 +7,7 @@ class Race:
         self.track = os.path.join('.\\tracks', track)
         self.mode = mode
         self.setup()
+        
 
     def setup(self):
         pygame.init()
@@ -14,12 +15,20 @@ class Race:
         self.map = pygame.image.load(self.track).convert()
         self.run = True
         self.screen.blit(self.map, (0, 0))
+        self.clock = pygame.time.Clock()
 
         #car stuff for now make this a class later
         self.car = pygame.image.load('car.png').convert_alpha()
         self.sloc = list(self.findstartline())
+        self.player = pygame.draw.rect(self.screen, color=(46,45,45), rect=(self.sloc, (45, 21)))
         self.screen.blit(self.car, self.sloc)
-        #self.player = pygame.draw.rect(self.car, color=(0, 0, 0, 0))
+        self.pos_x = self.sloc[0]
+        self.pos_y = self.sloc[1]
+        vel = 0
+        self.isDecel = False
+        self.isAccel = False
+        self.fw = False
+        self.rv = False
 
         while self.run:    
             for pog in pygame.event.get():
@@ -27,7 +36,41 @@ class Race:
                     pygame.quit()
                     self.run = False
                     sys.exit()
+                if pog.type == pygame.KEYDOWN:
+                    if pog.key == pygame.K_UP:
+                        self.fw = True
+                        self.rv = False
+                        self.isDecel = False
+                        self.isAccel = False
+                    elif pog.key ==pygame.K_DOWN:
+                        self.fw = False
+                        self.rv = True
+                        self.isDecel = False
+                        self.isAccel = False
+                if pog.type == pygame.KEYUP:
+                    if pog.key == pygame.K_UP:
+                        self.isDecel = True
+                        self.fw = False
+                        self.rv = False
+                    elif pog.key == pygame.K_DOWN:
+                        self.isAccel = True
+                        self.fw = False
+                        self.rv = False
+
+            if self.fw:
+                vel += 0.5
+            elif self.rv:
+                vel -= 0.5 
+
+            if self.isAccel and vel < 0:
+                vel += 0.1
+            elif self.isDecel and vel > 0:
+                vel -= 0.1
+            self.pos_x += vel
+            self.screen.blit(self.map, (0, 0))
+            self.screen.blit(self.car, (self.pos_x, self.pos_y))
             pygame.display.update()
+            self.clock.tick_busy_loop(60)
 
     def findstartline(self):
         for y in range(720):
