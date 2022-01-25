@@ -80,5 +80,3 @@ class Race:
                     return [x - 60, y + 15]
                     break
                 
-
-Race('map01.png', "AI")
