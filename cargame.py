@@ -1,6 +1,7 @@
 import pygame
 import os
 import sys
+import math
 
 class Race:
     def __init__(self, track, mode):
@@ -20,15 +21,19 @@ class Race:
         #car stuff for now make this a class later
         self.car = pygame.image.load('car.png').convert_alpha()
         self.sloc = list(self.findstartline())
-        self.player = pygame.draw.rect(self.screen, color=(46,45,45), rect=(self.sloc, (45, 21)))
         self.screen.blit(self.car, self.sloc)
+        self.rotated_sprite = self.car
         self.pos_x = self.sloc[0]
         self.pos_y = self.sloc[1]
-        vel = 0
+        self.center = [int(self.pos_y) + 45 / 2, int(self.pos_y) - 21 / 2]
+        self.speed = 0
+        self.angle = 0
         self.isDecel = False
         self.isAccel = False
         self.fw = False
         self.rv = False
+        self.rt = False
+        self.lt = False
 
         while self.run:    
             for pog in pygame.event.get():
@@ -47,6 +52,12 @@ class Race:
                         self.rv = True
                         self.isDecel = False
                         self.isAccel = False
+                    if pog.key == pygame.K_RIGHT:
+                        self.rt = True
+                        self.lt = False
+                    elif pog.key == pygame.K_LEFT:
+                        self.lt = True
+                        self.rt = False
                 if pog.type == pygame.KEYUP:
                     if pog.key == pygame.K_UP:
                         self.isDecel = True
@@ -56,39 +67,92 @@ class Race:
                         self.isAccel = True
                         self.fw = False
                         self.rv = False
+                    if pog.key == pygame.K_RIGHT:
+                        self.rt = False
+                        self.lt = False
+                    elif pog.key == pygame.K_LEFT:
+                        self.lt = False
+                        self.rt = False
 
             if self.fw:
-                vel += 0.6
+                self.speed += 0.4
             elif self.rv:
-                vel -= 0.6 
+                self.speed -= 0.4
+            if self.isAccel and self.speed < 0:
+                self.speed += 0.1
+            elif self.isDecel and self.speed > 0:
+                self.speed -= 0.1
+            if self.rt:
+                self.angle -= 4
+            if self.lt:
+                self.angle += 4
 
-            if self.isAccel and vel < 0:
-                vel += 0.1
-            elif self.isDecel and vel > 0:
-                vel -= 0.1
-            self.pos_x += vel
+            self.update()
+            print(self.alive)
             self.screen.blit(self.map, (0, 0))
-            self.player.move(vel, 0)
-            self.screen.blit(self.car, (self.pos_x, self.pos_y))
+            self.screen.blit(self.rotated_sprite, (self.pos_x, self.pos_y))
             pygame.display.update()
             self.clock.tick_busy_loop(60)
+        
+    def update(self):
+
+        self.rotated_sprite = self.rotate_center(self.car, self.angle)
+        self.pos_x += math.cos(math.radians(360 - self.angle)) * self.speed
+        self.pos_x = max(self.pos_x, 20)
+        self.pos_x = min(self.pos_x, 1280)
+
+        #self.distance += self.speed
+        #self.time += 1
+        
+        self.pos_y += math.sin(math.radians(360 - self.angle)) * self.speed
+        self.pos_y = max(self.pos_y, 20)
+        self.pos_y = min(self.pos_y, 1280 - 120)
+
+        self.center = [int(self.pos_y) + 45 / 2, int(self.pos_y) - 21 / 2]
+
+        #FIX THIS
+        length = 0.5 * (((45**2) + (21**2))**0.5)
+        left_top = [self.center[0] + math.cos(math.radians(360 - (self.angle + 25))) * length, self.center[1] + math.sin(math.radians(360 - (self.angle + 30))) * length]
+        right_top = [self.center[0] + math.cos(math.radians(360 - (self.angle + 155))) * length, self.center[1] + math.sin(math.radians(360 - (self.angle + 150))) * length]
+        left_bottom = [self.center[0] + math.cos(math.radians(360 - (self.angle + 215))) * length, self.center[1] + math.sin(math.radians(360 - (self.angle + 210))) * length]
+        right_bottom = [self.center[0] + math.cos(math.radians(360 - (self.angle + 335))) * length, self.center[1] + math.sin(math.radians(360 - (self.angle + 330))) * length]
+        self.corners = [left_top, right_top, left_bottom, right_bottom]
+
+        self.check_collision()
+    
+    def rotate_center(self, image, angle):
+        # Rotate The Rectangle
+        rectangle = image.get_rect()
+        rotated_image = pygame.transform.rotate(image, angle)
+        rotated_rectangle = rectangle.copy()
+        rotated_rectangle.center = rotated_image.get_rect().center
+        rotated_image = rotated_image.subsurface(rotated_rectangle).copy()
+        return rotated_image
+    
+    def check_collision(self):
+        self.alive = True
+        for point in self.corners:
+            pog = self.map.get_at((int(point[0]), int(point[1])))[:3]
+            if pog == (95,204,166):
+                self.alive = False
+                print(pog)
+                break
 
     def findstartline(self):
         for y in range(720):
             for x in range(1280):
                 p = self.screen.get_at([x, y])[:3]
                 if p == (245, 210, 31):
-                    self.arr = []
                     self.y1 = y
                     for z in range(90):
                         q = self.screen.get_at([x, y+z])[:3]
-                        if q == (245, 210, 31):
-                            pass
-                        else:
-                            return [x - 60, y+10+(z/2)]
+                        if q != (245, 210, 31):
+                            return [x - 60, y-10+(z/2)]
                 
 
 class Car:
     def __init__(self, pox, poy):
         self.ix = pox
         self.iy = poy
+
+Race('map02.png', "Manual")
