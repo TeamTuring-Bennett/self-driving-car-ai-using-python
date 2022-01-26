@@ -58,9 +58,9 @@ class Race:
                         self.rv = False
 
             if self.fw:
-                vel += 0.5
+                vel += 0.6
             elif self.rv:
-                vel -= 0.5 
+                vel -= 0.6 
 
             if self.isAccel and vel < 0:
                 vel += 0.1
@@ -68,6 +68,7 @@ class Race:
                 vel -= 0.1
             self.pos_x += vel
             self.screen.blit(self.map, (0, 0))
+            self.player.move(vel, 0)
             self.screen.blit(self.car, (self.pos_x, self.pos_y))
             pygame.display.update()
             self.clock.tick_busy_loop(60)
@@ -77,6 +78,17 @@ class Race:
             for x in range(1280):
                 p = self.screen.get_at([x, y])[:3]
                 if p == (245, 210, 31):
-                    return [x - 60, y + 15]
-                    break
+                    self.arr = []
+                    self.y1 = y
+                    for z in range(90):
+                        q = self.screen.get_at([x, y+z])[:3]
+                        if q == (245, 210, 31):
+                            pass
+                        else:
+                            return [x - 60, y+10+(z/2)]
                 
+
+class Car:
+    def __init__(self, pox, poy):
+        self.ix = pox
+        self.iy = poy

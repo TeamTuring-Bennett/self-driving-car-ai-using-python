@@ -81,7 +81,7 @@ class Paint(object):
             #self.c.create_line(self.points[-1], self.points[0], dash=1, width=2, fill='#e4e4e4')
             #self.c.create_line(self.points, dash=1, width=2, fill='#e4e4e4')
 
-            savename = simpledialog.askstring('Save track as PNG', 'Please pick a name for the track.')
+            savename = simpledialog.askstring('Save track as PNG', 'Please pick a name for the track. \n (Do not use any extentions)')
             if savename == None or savename == '':
                 messagebox.showerror('Could not export track', 'Invalid name!')
                 self.use_track()
