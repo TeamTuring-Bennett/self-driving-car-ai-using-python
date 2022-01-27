@@ -49,43 +49,43 @@ class Race:
                     pygame.quit()
                     self.run = False
                     sys.exit()
-                if self.mode == "Manual":
-                    #bind this to a function later
-                    #self.getManualInput()
-                    if pog.type == pygame.KEYDOWN:
-                        if pog.key == pygame.K_UP:
-                            self.fw = True
-                            self.rv = False
-                            self.isDecel = False
-                            self.isAccel = False
-                        elif pog.key ==pygame.K_DOWN:
-                            self.fw = False
-                            self.rv = True
-                            self.isDecel = False
-                            self.isAccel = False
-                        if pog.key == pygame.K_RIGHT:
-                            self.rt = True
-                            self.lt = False
-                        elif pog.key == pygame.K_LEFT:
-                            self.lt = True
-                            self.rt = False
-                    if pog.type == pygame.KEYUP:
-                        if pog.key == pygame.K_UP:
-                            self.isDecel = True
-                            self.fw = False
-                            self.rv = False
-                        elif pog.key == pygame.K_DOWN:
-                            self.isAccel = True
-                            self.fw = False
-                            self.rv = False
-                        if pog.key == pygame.K_RIGHT:
-                            self.rt = False
-                            self.lt = False
-                        elif pog.key == pygame.K_LEFT:
-                            self.lt = False
-                            self.rt = False
-                elif self.mode == "AI":
-                    self.getAIInput()
+            if self.mode == "Manual":
+                #bind this to a function later
+                #self.getManualInput()
+                if pog.type == pygame.KEYDOWN:
+                    if pog.key == pygame.K_UP:
+                        self.fw = True
+                        self.rv = False
+                        self.isDecel = False
+                        self.isAccel = False
+                    elif pog.key ==pygame.K_DOWN:
+                        self.fw = False
+                        self.rv = True
+                        self.isDecel = False
+                        self.isAccel = False
+                    if pog.key == pygame.K_RIGHT:
+                        self.rt = True
+                        self.lt = False
+                    elif pog.key == pygame.K_LEFT:
+                        self.lt = True
+                        self.rt = False
+                if pog.type == pygame.KEYUP:
+                    if pog.key == pygame.K_UP:
+                        self.isDecel = True
+                        self.fw = False
+                        self.rv = False
+                    elif pog.key == pygame.K_DOWN:
+                        self.isAccel = True
+                        self.fw = False
+                        self.rv = False
+                    if pog.key == pygame.K_RIGHT:
+                        self.rt = False
+                        self.lt = False
+                    elif pog.key == pygame.K_LEFT:
+                        self.lt = False
+                        self.rt = False
+            elif self.mode == "AI":
+                self.getAIInput()
 
             if self.fw:
                 self.speed += 0.3
@@ -227,4 +227,4 @@ class Race:
 
 
 #uncomment below as a testing step
-Race('map03.png', "Manual")
+#Race('map03.png', "Manual")
