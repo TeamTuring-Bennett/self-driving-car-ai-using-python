@@ -34,11 +34,14 @@ class Race:
         self.speed = 0
         self.angle = 0
         self.velangle = 0
-        self.distance = 0
-        self.time = 0
-        self.deaths = 0
         self.grip = 1
-        self.displayspeed = 0
+
+        #group of items to show in the TK window
+        self.distance = 0
+        self.deaths = 0
+        self.time = 0
+        self.displayspeed = 0 #add a speedometer if possible
+
         self.isDecel = False
         self.isAccel = False
         self.alive = True
@@ -101,8 +104,8 @@ class Race:
                 self.speed -= 0.1 * self.grip
             if abs(self.speed) <= 0.05:
                 self.speed = 0
-            elif abs(self.speed) >= 10:
-                self.speed = math.copysign(10, self.speed)
+            elif abs(self.speed) >= 9.985:
+                self.speed = math.copysign(9.985, self.speed)
             if self.rt and self.speed != 0:
                 self.angle -= 5
                 self.velangle -= 5 * self.grip
@@ -264,5 +267,5 @@ class Race:
     def getAIInput(self):
         return None
 #uncomment below as a testing step
-Race('map03.png', "Manual")
+#Race('map03.png', "Manual")
 
