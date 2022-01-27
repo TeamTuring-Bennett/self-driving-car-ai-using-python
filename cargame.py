@@ -1,3 +1,4 @@
+from turtle import speed
 import pygame
 import os
 import sys
@@ -100,8 +101,8 @@ class Race:
                 self.speed -= 0.1 * self.grip
             if abs(self.speed) <= 0.05:
                 self.speed = 0
-            elif abs(self.speed) >= 9.985:
-                self.speed = 9.985
+            elif abs(self.speed) >= 10:
+                self.speed = math.copysign(10, self.speed)
             if self.rt and self.speed != 0:
                 self.angle -= 5
                 self.velangle -= 5 * self.grip
@@ -204,7 +205,6 @@ class Race:
             else:
                 break
 
-        # Calculate Distance To Border And Append To Radars List
         dist = int(math.sqrt(math.pow(x - self.center[0], 2) + math.pow(y - self.center[1], 2)))
         self.radars.append([(x, y), dist])
 
@@ -217,7 +217,7 @@ class Race:
                     for z in range(90):
                         q = self.screen.get_at([x, y+z])[:3]
                         if q != (245, 210, 31):
-                            return [x - 60, y-10+(z/2)]
+                            return [x - 60, y+(z/2)-25]
 
 
     def calcSpeed(self):
