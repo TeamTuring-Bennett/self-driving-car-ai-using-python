@@ -14,11 +14,11 @@ class Race:
     def setup(self):
         pygame.init()
         self.screen = pygame.display.set_mode((1280, 720), vsync=1)
+        pygame.display.set_caption("Racing Environment. MODE:" + self.mode)
         self.map = pygame.image.load(self.track).convert()
         self.run = True
         self.screen.blit(self.map, (0, 0))
         self.clock = pygame.time.Clock()
-        self.dotmarker = pygame.image.load('dotmarker.png').convert()
 
         #car stuff for now make this a class later
         self.radars = []
@@ -118,8 +118,8 @@ class Race:
             self.screen.blit(self.map, (0, 0))
             if self.alive:
                 self.screen.blit(self.rotated_sprite, (self.pos_x, self.pos_y))
-                if self.mode == "AI":
-                    self.draw_radar()
+                #if self.mode == "AI":
+                self.draw_radar()
             else:
                 self.pos_x = self.sloc[0]
                 self.pos_y = self.sloc[1]
@@ -157,10 +157,10 @@ class Race:
 
         self.check_collision()
         self.displayspeed = self.calcSpeed()
-        if self.mode == "AI":
-            self.radars.clear()
-            for d in range(-180, 136, 45):
-                self.check_radar(d)
+        #if self.mode == "AI":
+        self.radars.clear()
+        for d in [-180, -155, -90, -25, 0, 25, 90, 155]:
+            self.check_radar(d)
     
     def rotate_center(self, image, angle):
         rectangle = image.get_rect()
@@ -182,7 +182,7 @@ class Race:
         for radar in self.radars:
             position = radar[0]
             pygame.draw.line(self.screen, (255, 0, 0), self.center, position, 1)
-            pygame.draw.circle(self.screen, (255, 0, 0), position, 3)
+            pygame.draw.circle(self.screen, (255, 0, 0), position, 5)
 
     def get_data(self):
         radars = self.radars
@@ -260,7 +260,9 @@ class Race:
                 elif pog.key == pygame.K_LEFT:
                     self.lt = False
                     self.rt = False
-                
+    
+    def getAIInput(self):
+        return None
 #uncomment below as a testing step
 Race('map03.png', "Manual")
 
