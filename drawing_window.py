@@ -26,8 +26,8 @@ class Paint(object):
         self.eraser_button = Button(self.root, text='eraser', command=self.use_eraser)
         self.eraser_button.grid(row=0, column=2)
 
-        self.choose_size_button = Scale(self.root, from_=60, to=90, orient=HORIZONTAL)
-        self.choose_size_button.set(75)
+        self.choose_size_button = Scale(self.root, from_=70, to=100, orient=HORIZONTAL)
+        self.choose_size_button.set(85)
         self.choose_size_button.grid(row=1, column=0, columnspan=2, pady=2)
 
         self.save_button = Button(self.root, text='Save Track', command=self.export)
@@ -114,7 +114,7 @@ class Paint(object):
                                capstyle=ROUND, smooth=TRUE, splinesteps=36)
         self.old_x = event.x
         self.old_y = event.y
-        if self.eraser_on:
+        if self.eraser_on or self.start:
             try:
                 self.points.remove((event.x, event.y))
             except:
