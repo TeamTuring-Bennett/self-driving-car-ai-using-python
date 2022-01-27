@@ -21,6 +21,8 @@ class Race:
         self.dotmarker = pygame.image.load('dotmarker.png').convert()
 
         #car stuff for now make this a class later
+        self.radars = []
+        self.drawing_radars = []
         self.car = pygame.image.load('car.png').convert_alpha()
         self.sloc = list(self.findstartline())
         self.screen.blit(self.car, self.sloc)
@@ -38,6 +40,7 @@ class Race:
         self.displayspeed = 0
         self.isDecel = False
         self.isAccel = False
+        self.alive = True
         self.fw = False
         self.rv = False
         self.rt = False
@@ -49,43 +52,43 @@ class Race:
                     pygame.quit()
                     self.run = False
                     sys.exit()
-            if self.mode == "Manual":
-                #bind this to a function later
-                #self.getManualInput()
-                if pog.type == pygame.KEYDOWN:
-                    if pog.key == pygame.K_UP:
-                        self.fw = True
-                        self.rv = False
-                        self.isDecel = False
-                        self.isAccel = False
-                    elif pog.key ==pygame.K_DOWN:
-                        self.fw = False
-                        self.rv = True
-                        self.isDecel = False
-                        self.isAccel = False
-                    if pog.key == pygame.K_RIGHT:
-                        self.rt = True
-                        self.lt = False
-                    elif pog.key == pygame.K_LEFT:
-                        self.lt = True
-                        self.rt = False
-                if pog.type == pygame.KEYUP:
-                    if pog.key == pygame.K_UP:
-                        self.isDecel = True
-                        self.fw = False
-                        self.rv = False
-                    elif pog.key == pygame.K_DOWN:
-                        self.isAccel = True
-                        self.fw = False
-                        self.rv = False
-                    if pog.key == pygame.K_RIGHT:
-                        self.rt = False
-                        self.lt = False
-                    elif pog.key == pygame.K_LEFT:
-                        self.lt = False
-                        self.rt = False
-            elif self.mode == "AI":
-                self.getAIInput()
+                if self.mode == "Manual":
+                    #bind this to a function later
+                    #self.getManualInput()
+                    if pog.type == pygame.KEYDOWN:
+                        if pog.key == pygame.K_UP:
+                            self.fw = True
+                            self.rv = False
+                            self.isDecel = False
+                            self.isAccel = False
+                        elif pog.key ==pygame.K_DOWN:
+                            self.fw = False
+                            self.rv = True
+                            self.isDecel = False
+                            self.isAccel = False
+                        if pog.key == pygame.K_RIGHT:
+                            self.rt = True
+                            self.lt = False
+                        elif pog.key == pygame.K_LEFT:
+                            self.lt = True
+                            self.rt = False
+                    if pog.type == pygame.KEYUP:
+                        if pog.key == pygame.K_UP:
+                            self.isDecel = True
+                            self.fw = False
+                            self.rv = False
+                        elif pog.key == pygame.K_DOWN:
+                            self.isAccel = True
+                            self.fw = False
+                            self.rv = False
+                        if pog.key == pygame.K_RIGHT:
+                            self.rt = False
+                            self.lt = False
+                        elif pog.key == pygame.K_LEFT:
+                            self.lt = False
+                            self.rt = False
+                elif self.mode == "AI":
+                    self.getAIInput()
 
             if self.fw:
                 self.speed += 0.3
@@ -99,12 +102,12 @@ class Race:
                 self.speed = 0
             elif abs(self.speed) >= 9.985:
                 self.speed = 9.985
-            if self.rt:
-                self.angle -= 4
-                self.velangle -= 4 * self.grip
-            if self.lt:
-                self.angle += 4
-                self.velangle += 4 * self.grip
+            if self.rt and self.speed != 0:
+                self.angle -= 5
+                self.velangle -= 5 * self.grip
+            if self.lt and self.speed != 0:
+                self.angle += 5
+                self.velangle += 5 * self.grip
             if self.displayspeed >= 120:
                 self.calcgrip()
             elif self.displayspeed <= 180 and self.rt == False and self.lt == False:
@@ -115,8 +118,8 @@ class Race:
             self.screen.blit(self.map, (0, 0))
             if self.alive:
                 self.screen.blit(self.rotated_sprite, (self.pos_x, self.pos_y))
-                for i in self.corners:
-                    self.screen.blit(self.dotmarker, (i[0] - 5, i[1] - 5))
+                if self.mode == "AI":
+                    self.draw_radar()
             else:
                 self.pos_x = self.sloc[0]
                 self.pos_y = self.sloc[1]
@@ -154,6 +157,10 @@ class Race:
 
         self.check_collision()
         self.displayspeed = self.calcSpeed()
+        if self.mode == "AI":
+            self.radars.clear()
+            for d in range(-180, 136, 45):
+                self.check_radar(d)
     
     def rotate_center(self, image, angle):
         rectangle = image.get_rect()
@@ -171,6 +178,36 @@ class Race:
                 self.alive = False
                 break
 
+    def draw_radar(self):
+        for radar in self.radars:
+            position = radar[0]
+            pygame.draw.line(self.screen, (255, 0, 0), self.center, position, 1)
+            pygame.draw.circle(self.screen, (255, 0, 0), position, 3)
+
+    def get_data(self):
+        radars = self.radars
+        return_values = [0, 0, 0, 0, 0]
+        for i, radar in enumerate(radars):
+            return_values[i] = int(radar[1] / 30)
+
+    
+    def check_radar(self, degree):
+        length = 0
+        x = int(self.center[0] + math.cos(math.radians(360 - (self.angle + degree))) * length)
+        y = int(self.center[1] + math.sin(math.radians(360 - (self.angle + degree))) * length)
+
+        while length < 1300:
+            if (self.map.get_at((x, y))[:3] == (245,210,31)) or (self.map.get_at((x, y))[:3] == (46,45,45)) and (length < 1300):
+                length += 1
+                x = int(self.center[0] + math.cos(math.radians(360 - (self.angle + degree))) * length)
+                y = int(self.center[1] + math.sin(math.radians(360 - (self.angle + degree))) * length)
+            else:
+                break
+
+        # Calculate Distance To Border And Append To Radars List
+        dist = int(math.sqrt(math.pow(x - self.center[0], 2) + math.pow(y - self.center[1], 2)))
+        self.radars.append([(x, y), dist])
+
     def findstartline(self):
         for y in range(720):
             for x in range(1280):
@@ -187,7 +224,7 @@ class Race:
         return abs(self.speed * 0.102 * 60) * 3.6
     
     def calcgrip(self):
-        self.grip = 1 - (((self.displayspeed - 110)//10)*0.07)
+        self.grip = 1 - (((self.displayspeed - 110)//10)*0.035)
 
     def getManualInput(self):
         for pog in pygame.event.get():
@@ -224,7 +261,6 @@ class Race:
                     self.lt = False
                     self.rt = False
                 
-
-
 #uncomment below as a testing step
-#Race('map03.png', "Manual")
+Race('map03.png', "Manual")
+
