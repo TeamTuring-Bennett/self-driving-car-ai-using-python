@@ -32,7 +32,7 @@ class MainMenu:
                             f(*args, **kwargs)
             return combined_func
 
-        allm = lambda: [self.Manual(), self.show()]
+        allm = lambda: [self.Manual(), self.show1()]
         alla = lambda: [self.AI(), self.show1()]
         
         self.button_ManualMode = Button(self.root, text="Manual Mode", command = allm ,fg ="#5fcca6", bg = "#2e2d2d", font=self.Font2)
