@@ -48,7 +48,7 @@ class Race:
         self.ddqn_scores = []
         self.eps_history = []
         if self.mode == "AI":
-            self.ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.99, n_actions=5, epsilon=1.00, epsilon_end=0.10, epsilon_dec=0.9995, replace_target= REPLACE_TARGET, batch_size=512, input_dims=19)
+            self.ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.99, n_actions=5, epsilon=1.00, epsilon_end=0.10, epsilon_dec=0.9995, replace_target= REPLACE_TARGET, batch_size=512, input_dims=8)
 
 
         #group of items to show in the TK window
@@ -67,6 +67,8 @@ class Race:
 
         if self.mode == "Manual":
             self.ManualGame()
+        elif self.mode == "AI":
+            self.setupAI()
         
     def update(self):
 
@@ -127,6 +129,7 @@ class Race:
             pog = self.map.get_at((int(point[0]), int(point[1])))[:3]
             if pog == (95,204,166):
                 self.alive = False
+                self.done = True
                 break
         for dist in self.get_data():
             if dist <= 0:
@@ -246,42 +249,37 @@ class Race:
             
             self.reset() #reset env 
 
-            done = False
+            self.done = False
             score = 0
             
-            observation_, reward, done = self.step(0)
+            observation_ = self.step(0)
             observation = np.array(observation_)
 
             gtime = 0 # set game time back to 0
             
-            renderFlag = True # if you want to render every episode set to true
 
-            if e % 10 == 0 and e > 0: # render every 10 episodes
-                renderFlag = True
-
-            while not done:
+            while not self.done:
                 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT: 
                         return
 
                 action = self.ddqn_agent.choose_action(observation)
-                observation_, reward, done = self.step(action)
+                observation_ = self.step(action)
                 observation_ = np.array(observation_)
 
-                score += reward
 
-                self.ddqn_agent.remember(observation, action, reward, observation_, int(done))
+                self.ddqn_agent.remember(observation, action, self.reward, observation_, int(self.done))
                 observation = observation_
                 self.ddqn_agent.learn()
                 
                 gtime += 1
+                score += self.reward
 
                 if gtime >= TOTAL_GAMETIME:
-                    done = True
-
-                if renderFlag:
-                    self.render()
+                    self.done = True
+                
+                self.render()
 
             self.eps_history.append(self.ddqn_agent.epsilon)
             self.ddqn_scores.append(score)
@@ -317,8 +315,12 @@ class Race:
             self.reward = -2
         elif self.speed == 0:
             self.reward = -1
+        else:
+            self.reward = 1
         if not self.alive:
-            self.reward = -5
+            self.reward = -10
+
+        return self.get_data()
 
     def action(self, choice):
         if choice == 0:
