@@ -24,7 +24,7 @@ class Race:
         #car stuff for now make this a class later
         self.radars = []
         self.drawing_radars = []
-        self.car = pygame.image.load('car.png').convert_alpha()
+        self.car = pygame.image.load('resources\images\car.png').convert_alpha()
         self.sloc = list(self.findstartline())
         self.screen.blit(self.car, self.sloc)
         self.rotated_sprite = self.car

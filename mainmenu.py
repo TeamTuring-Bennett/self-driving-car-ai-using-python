@@ -10,7 +10,7 @@ class MainMenu:
         self.root = Tk()
         self.root.title("Main Menu")
         self.root.geometry("1280x720")
-        bg = PhotoImage(file=r"image.png")
+        bg = PhotoImage(file=r"resources\images\image.png")
 
         my_label = Label(self.root, image=bg)
         my_label.place(x=0, y=0, relwidth=1, relheight=1)

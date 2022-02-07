@@ -42,7 +42,7 @@ class Paint(object):
         self.c = Canvas(self.root, bg='#5fcca6', width=1280, height=720)
         self.c.grid(row=2, columnspan=15)
 
-        f = open("dwins.txt", "r")
+        f = open("resources\dwins.txt", "r")
         self.ins = f.read()
         f.close()
 
