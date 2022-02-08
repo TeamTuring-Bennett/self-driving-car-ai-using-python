@@ -6,18 +6,20 @@ import numpy as np
 import matplotlib as plt
 from aicode import DDQNAgent
 from tkinter import *
+import threading
 
-#GLOBAL VARIABLES FOR THE AI
+# GLOBAL VARIABLES FOR THE AI
 TOTAL_GAMETIME = 1000
 N_EPISODES = 10000
-REPLACE_TARGET = 50 
+REPLACE_TARGET = 50
+
 
 class Race:
     def __init__(self, track, mode):
-        self.track = os.path.join('.\\tracks', track)
+        self.root = Tk()
+        self.track = os.path.join(".\\tracks", track)
         self.mode = mode
         self.setup()
-        
 
     def setup(self):
         pygame.init()
@@ -29,10 +31,10 @@ class Race:
         self.clock = pygame.time.Clock()
         self.radar = True
 
-        #car stuff
+        # car stuff
         self.radars = []
         self.drawing_radars = []
-        self.car = pygame.image.load('resources\images\car.png').convert_alpha()
+        self.car = pygame.image.load("resources\images\car.png").convert_alpha()
         self.sloc = list(self.findstartline())
         self.screen.blit(self.car, self.sloc)
         self.rotated_sprite = self.car
@@ -44,18 +46,27 @@ class Race:
         self.velangle = 0
         self.grip = 1
 
-        #AI
+        # AI
         self.ddqn_scores = []
         self.eps_history = []
         if self.mode == "AI":
-            self.ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.99, n_actions=5, epsilon=1.00, epsilon_end=0.10, epsilon_dec=0.9995, replace_target= REPLACE_TARGET, batch_size=512, input_dims=8)
+            self.ddqn_agent = DDQNAgent(
+                alpha=0.0005,
+                gamma=0.99,
+                n_actions=5,
+                epsilon=1.00,
+                epsilon_end=0.10,
+                epsilon_dec=0.9995,
+                replace_target=REPLACE_TARGET,
+                batch_size=512,
+                input_dims=8,
+            )
 
-
-        #group of items to show in the TK window
+        # group of items to show in the TK window
         self.distance = 0
         self.deaths = 0
         self.time = 0
-        self.displayspeed = 0 #add a speedometer if possible
+        self.displayspeed = 0  # add a speedometer if possible
 
         self.isDecel = False
         self.isAccel = False
@@ -69,7 +80,7 @@ class Race:
             self.ManualGame()
         elif self.mode == "AI":
             self.setupAI()
-        
+
     def update(self):
 
         if abs(self.speed) <= 0.05:
@@ -79,10 +90,12 @@ class Race:
         if self.displayspeed >= 120:
             self.calcgrip()
         elif self.displayspeed <= 210 and self.rt == False and self.lt == False:
-            self.grip = self.grip + (abs(1 - self.grip)/5)
+            self.grip = self.grip + (abs(1 - self.grip) / 5)
             if self.grip > 0.95:
                 self.grip = 1
-            self.velangle = self.velangle + math.copysign(abs(self.angle - self.velangle)/5, self.angle)
+            self.velangle = self.velangle + math.copysign(
+                abs(self.angle - self.velangle) / 5, self.angle
+            )
 
         self.rotated_sprite = self.rotate_center(self.car, self.angle)
         self.pos_x += math.cos(math.radians(360 - self.velangle)) * self.speed
@@ -90,31 +103,43 @@ class Race:
         self.pos_x = min(self.pos_x, 1278)
 
         self.distance += self.speed * 0.102
-        self.time += 1/60
-        
+        self.time += 1 / 60
+
         self.pos_y += math.sin(math.radians(360 - self.velangle)) * self.speed
         self.pos_y = max(self.pos_y, 2)
         self.pos_y = min(self.pos_y, 718)
 
-        self.center = [int(self.pos_x) + (45/2), int(self.pos_y) + (45/2)]
+        self.center = [int(self.pos_x) + (45 / 2), int(self.pos_y) + (45 / 2)]
 
-        length = (0.5 * (((45**2) + (21**2))**0.5)) - 5
-        left_top = [self.center[0] + math.cos(math.radians(360 - (self.angle + 25))) * length, self.center[1] + math.sin(math.radians(360 - (self.angle + 30))) * length]
-        right_top = [self.center[0] + math.cos(math.radians(360 - (self.angle + 155))) * length, self.center[1] + math.sin(math.radians(360 - (self.angle + 150))) * length]
-        left_bottom = [self.center[0] + math.cos(math.radians(360 - (self.angle + 215))) * length, self.center[1] + math.sin(math.radians(360 - (self.angle + 210))) * length]
-        right_bottom = [self.center[0] + math.cos(math.radians(360 - (self.angle + 335))) * length, self.center[1] + math.sin(math.radians(360 - (self.angle + 330))) * length]
+        length = (0.5 * (((45**2) + (21**2)) ** 0.5)) - 5
+        left_top = [
+            self.center[0] + math.cos(math.radians(360 - (self.angle + 25))) * length,
+            self.center[1] + math.sin(math.radians(360 - (self.angle + 30))) * length,
+        ]
+        right_top = [
+            self.center[0] + math.cos(math.radians(360 - (self.angle + 155))) * length,
+            self.center[1] + math.sin(math.radians(360 - (self.angle + 150))) * length,
+        ]
+        left_bottom = [
+            self.center[0] + math.cos(math.radians(360 - (self.angle + 215))) * length,
+            self.center[1] + math.sin(math.radians(360 - (self.angle + 210))) * length,
+        ]
+        right_bottom = [
+            self.center[0] + math.cos(math.radians(360 - (self.angle + 335))) * length,
+            self.center[1] + math.sin(math.radians(360 - (self.angle + 330))) * length,
+        ]
         self.corners = [left_top, right_top, left_bottom, right_bottom]
 
         self.check_collision()
         self.displayspeed = self.calcSpeed()
-        #if self.mode == "AI":
+        # if self.mode == "AI":
         self.radars.clear()
         for d in [-180, -155, -90, -25, 0, 25, 90, 155]:
             self.check_radar(d)
-    
+
     def decay(self):
         self.speed = self.speed - math.copysign(0.1, self.speed)
-    
+
     def rotate_center(self, image, angle):
         rectangle = image.get_rect()
         rotated_image = pygame.transform.rotate(image, angle)
@@ -122,18 +147,19 @@ class Race:
         rotated_rectangle.center = rotated_image.get_rect().center
         rotated_image = rotated_image.subsurface(rotated_rectangle).copy()
         return rotated_image
-    
+
     def check_collision(self):
         self.alive = True
         for point in self.corners:
             pog = self.map.get_at((int(point[0]), int(point[1])))[:3]
-            if pog == (95,204,166):
+            if pog == (95, 204, 166):
                 self.alive = False
                 self.done = True
                 break
-        for dist in self.get_data():
-            if dist <= 0:
-                print(self.get_data())
+        # for dist in self.get_data():
+        #     if dist <= 0:
+        #         print(self.get_data())
+
 
     def draw_radar(self):
         for radar in self.radars:
@@ -145,24 +171,41 @@ class Race:
         radars = self.radars
         return_values = [0, 0, 0, 0, 0, 0, 0, 0]
         for i, radar in enumerate(radars):
-            return_values[i] = int(radar[1] * 0.102) - 1 
+            return_values[i] = int(radar[1] * 0.102) - 1
         return return_values
 
-    
     def check_radar(self, degree):
         length = 0
-        x = int(self.center[0] + math.cos(math.radians(360 - (self.angle + degree))) * length)
-        y = int(self.center[1] + math.sin(math.radians(360 - (self.angle + degree))) * length)
+        x = int(
+            self.center[0]
+            + math.cos(math.radians(360 - (self.angle + degree))) * length
+        )
+        y = int(
+            self.center[1]
+            + math.sin(math.radians(360 - (self.angle + degree))) * length
+        )
 
         while length < 1300:
-            if (self.map.get_at((x, y))[:3] == (245,210,31)) or (self.map.get_at((x, y))[:3] == (46,45,45)) and (length < 1300):
+            if (
+                (self.map.get_at((x, y))[:3] == (245, 210, 31))
+                or (self.map.get_at((x, y))[:3] == (46, 45, 45))
+                and (length < 1300)
+            ):
                 length += 1
-                x = int(self.center[0] + math.cos(math.radians(360 - (self.angle + degree))) * length)
-                y = int(self.center[1] + math.sin(math.radians(360 - (self.angle + degree))) * length)
+                x = int(
+                    self.center[0]
+                    + math.cos(math.radians(360 - (self.angle + degree))) * length
+                )
+                y = int(
+                    self.center[1]
+                    + math.sin(math.radians(360 - (self.angle + degree))) * length
+                )
             else:
                 break
 
-        dist = int(math.sqrt(math.pow(x - self.center[0], 2) + math.pow(y - self.center[1], 2)))
+        dist = int(
+            math.sqrt(math.pow(x - self.center[0], 2) + math.pow(y - self.center[1], 2))
+        )
         self.radars.append([(x, y), dist])
 
     def findstartline(self):
@@ -172,19 +215,18 @@ class Race:
                 if p == (245, 210, 31):
                     self.y1 = y
                     for z in range(90):
-                        q = self.screen.get_at([x, y+z])[:3]
+                        q = self.screen.get_at([x, y + z])[:3]
                         if q != (245, 210, 31):
-                            return [x - 60, y+(z/2)-25]
-
+                            return [x - 60, y + (z / 2) - 25]
 
     def calcSpeed(self):
         return abs(self.speed * 0.102 * 60) * 3.6
-    
+
     def calcgrip(self):
-        self.grip = 1 - (((self.displayspeed - 110)//10)*0.035)
+        self.grip = 1 - (((self.displayspeed - 110) // 10) * 0.035)
 
     def ManualGame(self):
-        while self.run:    
+        while self.run:
             for pog in pygame.event.get():
                 if pog.type == pygame.QUIT:
                     pygame.quit()
@@ -205,7 +247,6 @@ class Race:
             if self.speed != 0 and self.fw == False and self.rv == False:
                 self.decay()
 
-
             self.update()
             self.render()
 
@@ -216,7 +257,7 @@ class Race:
                 self.rv = False
                 self.isDecel = False
                 self.isAccel = False
-            elif pog.key ==pygame.K_DOWN:
+            elif pog.key == pygame.K_DOWN:
                 self.fw = False
                 self.rv = True
                 self.isDecel = False
@@ -242,68 +283,147 @@ class Race:
             elif pog.key == pygame.K_LEFT:
                 self.lt = False
                 self.rt = False
-    
+
+    # def statsPrim(self):
+
+    #     self.EpisodeText = StringVar()
+    #     self.ScoreText = StringVar()
+    #     self.AvgScoreText = StringVar()
+    #     self.EpsilonText = StringVar()
+    #     self.MemSizeText = StringVar()
+
+    # def stats(self, ep, s, av, e, ms):
+
+    #     self.EpisodeText.set(ep)
+    #     self.ScoreText.set(s)
+    #     self.AvgScoreText.set(av)
+    #     self.EpsilonText.set(e)
+    #     self.MemSizeText.set(ms)
+
+    #     self.root.geometry("200x100")
+    #     self.root.title("statistics")
+
+    #     self.Episode = Label(self.root, text=f"Episode: {self.EpisodeText}")
+    #     self.Score = Label(self.root, text=f"Score: {self.ScoreText}")
+    #     self.AvgScore = Label(self.root, text=f"Average Score: {self.AvgScoreText}")
+    #     self.Epsilon = Label(self.root, text=f"Epsilon: {self.EpsilonText}")
+    #     self.MemSize = Label(self.root, text=f"Memory Size: {self.MemSizeText}")
+
+    #     self.Episode.pack()
+    #     self.Score.pack()
+    #     self.AvgScore.pack()
+    #     self.Epsilon.pack()
+    #     self.MemSize.pack()
+
+    #     self.root.mainloop()
+
+    # def statsSet(self, ep, s, av, e, ms):
+
+    #     self.EpisodeText.set(ep)
+    #     self.ScoreText.set(s)
+    #     self.AvgScoreText.set(av)
+    #     self.EpsilonText.set(e)
+    #     self.MemSizeText.set(ms)
+
     def setupAI(self):
-        
+
         for e in range(N_EPISODES):
-            
-            self.reset() #reset env 
+
+            self.reset()  # reset env
 
             self.done = False
             score = 0
-            
+
             observation_ = self.step(0)
             observation = np.array(observation_)
 
-            gtime = 0 # set game time back to 0
-            
+            gtime = 0  # set game time back to 0
 
             while not self.done:
-                
+
                 for event in pygame.event.get():
-                    if event.type == pygame.QUIT: 
+                    if event.type == pygame.QUIT:
                         return
 
                 action = self.ddqn_agent.choose_action(observation)
                 observation_ = self.step(action)
                 observation_ = np.array(observation_)
 
-
-                self.ddqn_agent.remember(observation, action, self.reward, observation_, int(self.done))
+                self.ddqn_agent.remember(
+                    observation, action, self.reward, observation_, int(self.done)
+                )
                 observation = observation_
                 self.ddqn_agent.learn()
-                
+
                 gtime += 1
                 score += self.reward
 
                 if gtime >= TOTAL_GAMETIME:
                     self.done = True
-                
+
                 self.render()
 
             self.eps_history.append(self.ddqn_agent.epsilon)
             self.ddqn_scores.append(score)
-            avg_score = np.mean(self.ddqn_scores[max(0, e-100):(e+1)])
+            avg_score = np.mean(self.ddqn_scores[max(0, e - 100) : (e + 1)])
 
             if e % REPLACE_TARGET == 0 and e > REPLACE_TARGET:
                 self.ddqn_agent.update_network_parameters()
 
             if e % 10 == 0 and e > 10:
                 self.ddqn_agent.save_model()
-                print("save model")
+                # print("save model")
+
+            # self.statsSet(
+            #     e,
+            #     score,
+            #     avg_score,
+            #     self.ddqn_agent.epsilon,
+            #     self.ddqn_agent.memory.mem_cntr % self.ddqn_agent.memory.mem_size,
+            # )
+
+            os.system("cls")
+            os.system('mode con: cols=50 lines=12')
+            os.system('color 73')
+            print(
                 
-            print('episode: ', e,'score: %.2f' % score,
-                ' average score %.2f' % avg_score,
-                ' epsolon: ', self.ddqn_agent.epsilon,
-                ' memory size', self.ddqn_agent.memory.mem_cntr % self.ddqn_agent.memory.mem_size) 
-    
+                "Stats Of The Self Driving Car", "\n", "\n",
+
+                "Episode: ",
+                e, "\n",
+                "Score: %.2f" % score, "\n",
+                "Average Score %.2f" % avg_score, "\n",
+                "Epsilon: ",
+                self.ddqn_agent.epsilon, "\n",
+                "Memory size",
+                self.ddqn_agent.memory.mem_cntr % self.ddqn_agent.memory.mem_size, "\n"
+            )
+
+    # def setupAI(self):
+    #     self.statsPrim()
+
+    #     t1 = threading.Thread(
+    #         target=self.stats,
+    #         args=(
+    #             0,
+    #             0,
+    #             0,
+    #             0,
+    #             0,
+    #         ),
+    #     )
+    #     t2 = threading.Thread(target=self.actualGamer()())
+
+    #     t2.start()
+    #     t1.start()
+
     def reset(self):
         self.pos_x = self.sloc[0]
         self.pos_y = self.sloc[1]
         self.angle = 0
         self.velangle = self.angle
         self.speed = 0
-    
+
     def step(self, action):
 
         self.done = False
@@ -318,7 +438,7 @@ class Race:
         else:
             self.reward = 1
         if not self.alive:
-            self.reward = -10
+            self.reward = -100
 
         return self.get_data()
 
@@ -354,7 +474,7 @@ class Race:
             self.decay()
             self.angle -= 5
             self.angle -= 5 * self.grip
-        
+
         self.update()
         pass
 
@@ -371,11 +491,11 @@ class Race:
             self.velangle = self.angle
             self.speed = 0
             self.deaths += 1
-        #uncomment if debugging numbers
-        #print(self.distance, self.time, self.displayspeed)
+        # uncomment if debugging numbers
+        # print(self.distance, self.time, self.displayspeed)
         pygame.display.update()
         self.clock.tick_busy_loop(60)
 
-#uncomment below as a testing step
-Race('testmap.png', "AI")
 
+# uncomment below as a testing step
+# Race("testmap.png", "AI")
