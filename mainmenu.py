@@ -119,22 +119,22 @@ class MainMenu:
             + ".png"
         )
 
-    def show1(self):
-        self.root = Tk()
-        self.root.geometry("200x100")
-        self.root.title("statistics")
+    # def show1(self):
+    #     self.root = Tk()
+    #     self.root.geometry("200x100")
+    #     self.root.title("statistics")
 
-        self.Distance = Label(self.root, text=f"Distance: {''}")
-        self.Deaths = Label(self.root, text=f"Deaths: {''}")
-        self.Time1 = Label(self.root, text=f"Time: {''}")
-        self.Speed = Label(self.root, text=f"Speed: {''}")
+    #     self.Distance = Label(self.root, text=f"Distance: {''}")
+    #     self.Deaths = Label(self.root, text=f"Deaths: {''}")
+    #     self.Time1 = Label(self.root, text=f"Time: {''}")
+    #     self.Speed = Label(self.root, text=f"Speed: {''}")
 
-        self.Distance.pack()
-        self.Deaths.pack()
-        self.Time1.pack()
-        self.Speed.pack()
+    #     self.Distance.pack()
+    #     self.Deaths.pack()
+    #     self.Time1.pack()
+    #     self.Speed.pack()
 
-        self.root.mainloop()
+    #     self.root.mainloop()
 
 
 if __name__ == "__main__":
