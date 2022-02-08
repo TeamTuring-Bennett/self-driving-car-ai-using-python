@@ -53,10 +53,10 @@ class Race:
             self.ddqn_agent = DDQNAgent(
                 alpha=0.0005,
                 gamma=0.99,
-                n_actions=5,
+                n_actions=9,
                 epsilon=1.00,
-                epsilon_end=0.10,
-                epsilon_dec=0.9995,
+                epsilon_end=0.05,
+                epsilon_dec=0.995,
                 replace_target=REPLACE_TARGET,
                 batch_size=512,
                 input_dims=8,
@@ -87,9 +87,9 @@ class Race:
             self.speed = 0
         elif abs(self.speed) >= 9.985:
             self.speed = math.copysign(9.985, self.speed)
-        if self.displayspeed >= 120:
+        if self.displayspeed >= 160:
             self.calcgrip()
-        elif self.displayspeed <= 210 and self.rt == False and self.lt == False:
+        if self.displayspeed <= 210 and self.rt == False and self.lt == False:
             self.grip = self.grip + (abs(1 - self.grip) / 5)
             if self.grip > 0.95:
                 self.grip = 1
@@ -223,7 +223,7 @@ class Race:
         return abs(self.speed * 0.102 * 60) * 3.6
 
     def calcgrip(self):
-        self.grip = 1 - (((self.displayspeed - 110) // 10) * 0.035)
+        self.grip = 1 - (((self.displayspeed - 160) // 10) * 0.025)
 
     def ManualGame(self):
         while self.run:
@@ -384,7 +384,6 @@ class Race:
 
             os.system("cls")
             os.system('mode con: cols=50 lines=12')
-            os.system('color 73')
             print(
                 
                 "Stats Of The Self Driving Car", "\n", "\n",
@@ -435,10 +434,11 @@ class Race:
             self.reward = -2
         elif self.speed == 0:
             self.reward = -1
-        else:
+        elif self.speed > 1:
             self.reward = 1
         if not self.alive:
-            self.reward = -100
+            self.reward = -15
+            self.done =  True
 
         return self.get_data()
 
@@ -498,4 +498,4 @@ class Race:
 
 
 # uncomment below as a testing step
-# Race("testmap.png", "AI")
+Race("testmap.png", "AI")
