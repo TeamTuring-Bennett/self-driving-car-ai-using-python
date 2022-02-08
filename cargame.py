@@ -498,4 +498,4 @@ class Race:
 
 
 # uncomment below as a testing step
-Race("testmap.png", "AI")
+# Race("testmap.png", "AI")
