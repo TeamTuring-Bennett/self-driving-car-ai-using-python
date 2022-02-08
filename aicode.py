@@ -1,8 +1,10 @@
 from keras.layers import Dense, Activation
 from keras.models import Sequential, load_model
-#from keras.optimizers import Adam
 import numpy as np
 import tensorflow as tf
+
+# from keras.optimizers import Adam
+
 
 class ReplayBuffer(object):
     def __init__(self, max_size, input_shape, n_actions, discrete=False):
@@ -44,11 +46,21 @@ class ReplayBuffer(object):
         return states, actions, rewards, states_, terminal
 
 
-
 class DDQNAgent(object):
-    def __init__(self, alpha, gamma, n_actions, epsilon, batch_size,
-                 input_dims, epsilon_dec=0.999995,  epsilon_end=0.10,
-                 mem_size=25000, fname='ddqn_model.h5', replace_target=25):
+    def __init__(
+        self,
+        alpha,
+        gamma,
+        n_actions,
+        epsilon,
+        batch_size,
+        input_dims,
+        epsilon_dec=0.999995,
+        epsilon_end=0.10,
+        mem_size=25000,
+        fname="ddqn_model.h5",
+        replace_target=25,
+    ):
         self.action_space = [i for i in range(n_actions)]
         self.n_actions = n_actions
         self.gamma = gamma
@@ -59,10 +71,9 @@ class DDQNAgent(object):
         self.model_file = fname
         self.replace_target = replace_target
         self.memory = ReplayBuffer(mem_size, input_dims, n_actions, discrete=True)
-       
+
         self.brain_eval = Brain(input_dims, n_actions, batch_size)
         self.brain_target = Brain(input_dims, n_actions, batch_size)
-
 
     def remember(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)
@@ -83,7 +94,9 @@ class DDQNAgent(object):
 
     def learn(self):
         if self.memory.mem_cntr > self.batch_size:
-            state, action, reward, new_state, done = self.memory.sample_buffer(self.batch_size)
+            state, action, reward, new_state, done = self.memory.sample_buffer(
+                self.batch_size
+            )
 
             action_values = np.array(self.action_space, dtype=np.int8)
             action_indices = np.dot(action, action_values)
@@ -98,55 +111,59 @@ class DDQNAgent(object):
 
             batch_index = np.arange(self.batch_size, dtype=np.int32)
 
-            q_target[batch_index, action_indices] = reward + self.gamma*q_next[batch_index, max_actions.astype(int)]*done
+            q_target[batch_index, action_indices] = (
+                reward
+                + self.gamma * q_next[batch_index, max_actions.astype(int)] * done
+            )
 
             _ = self.brain_eval.train(state, q_target)
 
-            self.epsilon = self.epsilon*self.epsilon_dec if self.epsilon > self.epsilon_min else self.epsilon_min
-
+            self.epsilon = (
+                self.epsilon * self.epsilon_dec
+                if self.epsilon > self.epsilon_min
+                else self.epsilon_min
+            )
 
     def update_network_parameters(self):
         self.brain_target.copy_weights(self.brain_eval)
 
     def save_model(self):
         self.brain_eval.model.save(self.model_file)
-        
+
     def load_model(self):
         self.brain_eval.model = load_model(self.model_file)
         self.brain_target.model = load_model(self.model_file)
-       
+
         if self.epsilon == 0.0:
             self.update_network_parameters()
 
 
 class Brain:
-    def __init__(self, NbrStates, NbrActions, batch_size = 256):
+    def __init__(self, NbrStates, NbrActions, batch_size=256):
         self.NbrStates = NbrStates
         self.NbrActions = NbrActions
         self.batch_size = batch_size
         self.model = self.createModel()
-        
-    
+
     def createModel(self):
         model = tf.keras.Sequential()
-        model.add(tf.keras.layers.Dense(256, activation=tf.nn.relu)) #prev 256 
+        model.add(tf.keras.layers.Dense(256, activation=tf.nn.relu))  # prev 256
         model.add(tf.keras.layers.Dense(self.NbrActions, activation=tf.nn.softmax))
-        model.compile(loss = "mse", optimizer="adam")
+        model.compile(loss="mse", optimizer="adam")
 
         return model
-    
-    def train(self, x, y, epoch = 1, verbose = 0):
-        self.model.fit(x, y, batch_size = self.batch_size , verbose = verbose)
+
+    def train(self, x, y, epoch=1, verbose=0):
+        self.model.fit(x, y, batch_size=self.batch_size, verbose=verbose)
 
     def predict(self, s):
         return self.model.predict(s)
 
     def predictOne(self, s):
         return self.model.predict(tf.reshape(s, [1, self.NbrStates])).flatten()
-    
+
     def copy_weights(self, TrainNet):
         variables1 = self.model.trainable_variables
         variables2 = TrainNet.model.trainable_variables
         for v1, v2 in zip(variables1, variables2):
             v1.assign(v2.numpy())
-        
